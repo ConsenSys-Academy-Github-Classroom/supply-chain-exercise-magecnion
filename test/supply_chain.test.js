@@ -1,6 +1,6 @@
 let BN = web3.utils.BN;
 let SupplyChain = artifacts.require("SupplyChain");
-let { catchRevert } = require("./exceptionsHelpers.js");
+let { catchRevert, catchNotPaidEnough } = require("./exceptionsHelpers.js");
 const {
   items: ItemStruct,
   isDefined,
@@ -255,7 +255,7 @@ contract("SupplyChain", function (accounts) {
 
     it("should error when not enough value is sent when purchasing an item", async () => {
       await instance.addItem(name, price, { from: alice });
-      await catchRevert(instance.buyItem(0, { from: bob, value: 1 }));
+      await catchNotPaidEnough(instance.buyItem(0, { from: bob, value: "999" }));
     });
 
     it("should emit LogSold event when and item is purchased", async () => {

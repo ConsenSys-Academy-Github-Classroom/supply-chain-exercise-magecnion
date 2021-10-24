@@ -38,7 +38,7 @@ contract SupplyChain {
     }
 
     modifier paidEnough(uint _price) {
-        require(msg.value >= _price);
+        require(msg.value >= _price, 'buyer did not pay enough');
         _;
     }
 
@@ -46,7 +46,8 @@ contract SupplyChain {
         _;
         uint _price = items[_sku].price;
         uint amountToRefund = msg.value - _price;
-        items[_sku].buyer.transfer(amountToRefund);
+        (bool sent, ) = items[_sku].buyer.call{value: amountToRefund}("");
+        require(sent, "Failed to send Ether in checkValue");
     }
 
     // For each of the following modifiers, use what you learned about modifiers
@@ -103,7 +104,7 @@ contract SupplyChain {
         checkValue(sku)
     {
         (bool sent, ) = items[sku].seller.call{value: items[sku].price}("");
-        require(sent, "Failed to send Ether");
+        require(sent, "Failed to send Ether in buyItem");
         items[sku].buyer = payable(msg.sender);
         items[sku].state = State.Sold;
 
